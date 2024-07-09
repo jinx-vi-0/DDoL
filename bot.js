@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { LeetCode } = require('leetcode-query');
 const cron = require('node-cron');
+const keep_alive = require('./keep_alive.js')
 require('dotenv').config();
 
 const client = new Client({
