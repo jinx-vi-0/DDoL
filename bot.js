@@ -20,7 +20,7 @@ const lc = new LeetCode();
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 
-    cron.schedule('0 6 * * *', async () => {
+    cron.schedule('0 7 * * *', async () => {
         try {
             const daily = await lc.daily();
             const channel = client.channels.cache.get(process.env.CHANNEL_ID);
@@ -34,6 +34,9 @@ client.once('ready', () => {
         } catch (error) {
             console.error('Error fetching LeetCode daily challenge:', error);
         }
+    }, {
+        scheduled: true,
+        timezone: "Asia/Kolkata"
     });
 });
 
