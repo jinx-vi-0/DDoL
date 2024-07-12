@@ -75,7 +75,7 @@ client.on('messageCreate', async (message) => {
         const username = args[1];
         try {
             const contestInfo = await lc.user_contest_info(username);
-            const responseMessage = `username : **${username}**\nContest : ${contestInfo.userContestRanking.attendedContestsCount}\nRating : ${contestInfo.userContestRanking.rating}\nTop : ${contestInfo.userContestRanking.topPercentage}%\nBadge : ${contestInfo.userContestRanking.badge ? contestInfo.userContestRanking.badge : 'No badge'}`;
+            const responseMessage = `username : **${username}**\nContest : ${contestInfo.userContestRanking.attendedContestsCount}\nRating : ${Math.round(contestInfo.userContestRanking.rating)}\nTop : ${contestInfo.userContestRanking.topPercentage}%\nBadge : ${contestInfo.userContestRanking.badge ? contestInfo.userContestRanking.badge : 'No badge'}`;
             message.channel.send(responseMessage);
         } catch (error) {
             console.error('Error fetching user info:', error);
