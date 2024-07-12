@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { LeetCode } from 'leetcode-query';
 import cron from 'node-cron';
-import keep_alive from './keep_alive.js';
+import keepAlive from './keep_alive.js';
 import dotenv from 'dotenv';
 import leetcodeProblems from './problems.js';
 
