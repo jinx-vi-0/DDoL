@@ -45,7 +45,11 @@ client.once('ready', () => {
 
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
-    if (message.content === '/potd') {
+
+    const args = message.content.split(' ');
+    const command = args[0].toLowerCase();
+
+    if (command === ';potd') {
         try {
             const daily = await lc.daily();
             const questionLink = `https://leetcode.com${daily.link}`;
@@ -55,19 +59,38 @@ client.on('messageCreate', async (message) => {
             console.error('Error fetching LeetCode daily challenge:', error);
             message.channel.send('Sorry, I could not fetch the LeetCode daily challenge question.');
         }
-    } else if (message.content === '/random') {
+    } else if (command === ';random') {
         try {
             const randomIndex = Math.floor(Math.random() * leetcodeProblems.length);
             let problem = leetcodeProblems[randomIndex];
             let selectedProblem = problem.toLowerCase().replace(/ /g, '-');
             const questionLink = `https://leetcode.com/problems/${selectedProblem}`;
-            const responseMessage = `**Problem:** **${problem}** :\n ${questionLink}`;
+            const responseMessage = `**Problem:** **${problem}** :\n${questionLink}`;
             message.channel.send(responseMessage);
         } catch (error) {
             console.error('Error fetching random LeetCode question:', error);
             message.channel.send('Sorry, I could not fetch a random LeetCode question.');
         }
+    } else if (command === ';user' && args.length === 2) {
+        const username = args[1];
+        try {
+            const contestInfo = await lc.user_contest_info(username);
+            const responseMessage = `username : **${username}**\nContest : ${contestInfo.userContestRanking.attendedContestsCount}\nRating : ${contestInfo.userContestRanking.rating}\nTop : ${contestInfo.userContestRanking.topPercentage}%\nBadge : ${contestInfo.userContestRanking.badge ? contestInfo.userContestRanking.badge : 'No badge'}`;
+            message.channel.send(responseMessage);
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+            message.channel.send('Sorry, I could not fetch the user info.');
+        }
+    } else if (command === ';help') {
+        const helpMessage = `**Available Commands:**\n
+        \`;potd\` - Shows the LeetCode Daily Challenge\n
+        \`;random\` - Shows a random LeetCode problem\n
+        \`;user <username>\` - Shows user Info\n
+        \`;help\` - Shows help message`;
+        message.channel.send(helpMessage);
     }
 });
+
+keepAlive();
 
 client.login(process.env.TOKEN);
