@@ -1,10 +1,18 @@
-import http from 'http';
+// keep_alive.js
+import express from 'express';
 
-export default function keepAlive() {
-    http.createServer((req, res) => {
-        res.write("I'm alive");
-        res.end();
-    }).listen(8080);
+const app = express();
 
-    console.log("Server is running on port 8080");
-}
+// Route to keep the bot running
+app.get('/', (req, res) => {
+    res.send('Bot is running!');
+});
+
+// Listen on port
+const keepAlive = () => {
+    app.listen(3000, () => {
+        console.log('Server is ready.');
+    });
+};
+
+export default keepAlive;

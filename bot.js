@@ -7,6 +7,7 @@ import leetcodeProblems from './problems.js';
 
 dotenv.config();
 
+// Create a new Discord client
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -23,6 +24,7 @@ const lc = new LeetCode();
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 
+    // Schedule daily LeetCode challenge message at 6 AM IST
     cron.schedule('0 6 * * *', async () => {
         try {
             const daily = await lc.daily();
@@ -61,6 +63,9 @@ client.on('messageCreate', async (message) => {
         }
     } else if (command === ';random') {
         try {
+            if (leetcodeProblems.length === 0) {
+                return message.channel.send('No LeetCode problems available.');
+            }
             const randomIndex = Math.floor(Math.random() * leetcodeProblems.length);
             let problem = leetcodeProblems[randomIndex];
             let selectedProblem = problem.toLowerCase().replace(/ /g, '-');
@@ -75,6 +80,9 @@ client.on('messageCreate', async (message) => {
         const username = args[1];
         try {
             const contestInfo = await lc.user_contest_info(username);
+            if (!contestInfo.userContestRanking) {
+                return message.channel.send(`No contest data found for user: **${username}**`);
+            }
             const responseMessage = `username : **${username}**\nContest : ${contestInfo.userContestRanking.attendedContestsCount}\nRating : ${Math.round(contestInfo.userContestRanking.rating)}\nTop : ${contestInfo.userContestRanking.topPercentage}%\nBadge : ${contestInfo.userContestRanking.badge ? contestInfo.userContestRanking.badge : 'No badge'}`;
             message.channel.send(responseMessage);
         } catch (error) {
@@ -91,6 +99,8 @@ client.on('messageCreate', async (message) => {
     }
 });
 
+// Keep the bot running with Express
 keepAlive();
 
+// Login the bot with the token
 client.login(process.env.TOKEN);
