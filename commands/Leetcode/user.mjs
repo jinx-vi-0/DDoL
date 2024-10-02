@@ -4,6 +4,7 @@ const lc = new LeetCode();
 export default {
   name: "user",
   description: "Fetch LeetCode user information",
+  aliases: ["profile"], // Add aliases here
   async execute(client, message, args) {
     if (args.length !== 1) {
       return message.channel.send("Please provide a valid LeetCode username.");

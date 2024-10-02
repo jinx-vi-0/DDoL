@@ -4,6 +4,7 @@ const lc = new LeetCode();
 export default {
   name: "potd",
   description: "Shows the LeetCode Daily Challenge",
+  aliases: ["lcd", "daily"], // Add aliases here
   async execute(client, message, args) {
     try {
       const daily = await lc.daily();
