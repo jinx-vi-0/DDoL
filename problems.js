@@ -2753,4 +2753,4 @@ const leetcodeProblems = [
   "Convert JSON String to Object",
 ];
 
-export default leetcodeProblems
+export default leetcodeProblems;
