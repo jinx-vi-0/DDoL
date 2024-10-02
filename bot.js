@@ -7,6 +7,9 @@ import leetcodeProblems from './problems.js';
 
 dotenv.config();
 
+const COMMAND_PREFIX = ';';
+const TIMEZONE = "Asia/Kolkata";
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -30,16 +33,16 @@ client.once('ready', () => {
             if (channel) {
                 const questionLink = `https://leetcode.com${daily.link}`;
                 const response = `@everyone **LeetCode Daily Challenge ${daily.date}:**\n**${daily.question.title}** : ${questionLink}`;
-                channel.send(response);
+                await channel.send(response);
             } else {
                 console.error('Channel not found');
             }
         } catch (error) {
-            console.error('Error fetching LeetCode daily challenge:', error);
+            console.error('Error fetching LeetCode daily challenge:', error.message);
         }
     }, {
         scheduled: true,
-        timezone: "Asia/Kolkata"
+        timezone: TIMEZONE
     });
 });
 
@@ -49,45 +52,35 @@ client.on('messageCreate', async (message) => {
     const args = message.content.split(' ');
     const command = args[0].toLowerCase();
 
-    if (command === ';potd') {
-        try {
+    try {
+        if (command === `${COMMAND_PREFIX}potd`) {
             const daily = await lc.daily();
             const questionLink = `https://leetcode.com${daily.link}`;
             const responseMessage = `**LeetCode Daily Challenge ${daily.date}:**\n**${daily.question.title}** : ${questionLink}`;
-            message.channel.send(responseMessage);
-        } catch (error) {
-            console.error('Error fetching LeetCode daily challenge:', error);
-            message.channel.send('Sorry, I could not fetch the LeetCode daily challenge question.');
-        }
-    } else if (command === ';random') {
-        try {
+            await message.channel.send(responseMessage);
+        } else if (command === `${COMMAND_PREFIX}random`) {
             const randomIndex = Math.floor(Math.random() * leetcodeProblems.length);
-            let problem = leetcodeProblems[randomIndex];
-            let selectedProblem = problem.toLowerCase().replace(/ /g, '-');
+            const problem = leetcodeProblems[randomIndex];
+            const selectedProblem = problem.toLowerCase().replace(/ /g, '-');
             const questionLink = `https://leetcode.com/problems/${selectedProblem}`;
             const responseMessage = `**Problem:** **${problem}** :\n${questionLink}`;
-            message.channel.send(responseMessage);
-        } catch (error) {
-            console.error('Error fetching random LeetCode question:', error);
-            message.channel.send('Sorry, I could not fetch a random LeetCode question.');
-        }
-    } else if (command === ';user' && args.length === 2) {
-        const username = args[1];
-        try {
+            await message.channel.send(responseMessage);
+        } else if (command === `${COMMAND_PREFIX}user` && args.length === 2) {
+            const username = args[1];
             const contestInfo = await lc.user_contest_info(username);
-            const responseMessage = `username : **${username}**\nContest : ${contestInfo.userContestRanking.attendedContestsCount}\nRating : ${Math.round(contestInfo.userContestRanking.rating)}\nTop : ${contestInfo.userContestRanking.topPercentage}%\nBadge : ${contestInfo.userContestRanking.badge ? contestInfo.userContestRanking.badge : 'No badge'}`;
-            message.channel.send(responseMessage);
-        } catch (error) {
-            console.error('Error fetching user info:', error);
-            message.channel.send('Sorry, I could not fetch the user info.');
+            const responseMessage = `username : **${username}**\nContest : ${contestInfo.userContestRanking.attendedContestsCount}\nRating : ${Math.round(contestInfo.userContestRanking.rating)}\nTop : ${contestInfo.userContestRanking.topPercentage}%\nBadge : ${contestInfo.userContestRanking.badge || 'No badge'}`;
+            await message.channel.send(responseMessage);
+        } else if (command === `${COMMAND_PREFIX}help`) {
+            const helpMessage = `**Available Commands:**\n
+            \`${COMMAND_PREFIX}potd\` - Shows the LeetCode Daily Challenge\n
+            \`${COMMAND_PREFIX}random\` - Shows a random LeetCode problem\n
+            \`${COMMAND_PREFIX}user <username>\` - Shows user info\n
+            \`${COMMAND_PREFIX}help\` - Shows help message`;
+            await message.channel.send(helpMessage);
         }
-    } else if (command === ';help') {
-        const helpMessage = `**Available Commands:**\n
-        \`;potd\` - Shows the LeetCode Daily Challenge\n
-        \`;random\` - Shows a random LeetCode problem\n
-        \`;user <username>\` - Shows user Info\n
-        \`;help\` - Shows help message`;
-        message.channel.send(helpMessage);
+    } catch (error) {
+        console.error('Error processing command:', error.message);
+        await message.channel.send('An error occurred while processing your command.');
     }
 });
 
