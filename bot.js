@@ -81,11 +81,28 @@ client.on('messageCreate', async (message) => {
             console.error('Error fetching user info:', error);
             message.channel.send('Sorry, I could not fetch the user info.');
         }
-    } else if (command === ';help') {
+    } else if (command === ';streak' && args.length === 2) {
+        const username = args[1];
+        try {
+            const streakInfo = await lc.user(username);
+            let streakMessage;
+            if (streakInfo.consecutiveDays > 0) {
+                streakMessage = `**${username}** has solved a problem for ${streakInfo.consecutiveDays} consecutive days! Keep it up!`;
+            } else {
+                streakMessage = `**${username}** does not have a streak yet. Start solving problems to build your streak!`;
+            }
+            message.channel.send(streakMessage);
+        } catch (error) {
+            console.error('Error fetching streak info:', error);
+            message.channel.send('Sorry, I could not fetch the streak info.');
+        }
+    }
+    else if (command === ';help') {
         const helpMessage = `**Available Commands:**\n
         \`;potd\` - Shows the LeetCode Daily Challenge\n
         \`;random\` - Shows a random LeetCode problem\n
         \`;user <username>\` - Shows user Info\n
+        \`;streak <username>\` - Shows user Streak Info
         \`;help\` - Shows help message`;
         message.channel.send(helpMessage);
     }
