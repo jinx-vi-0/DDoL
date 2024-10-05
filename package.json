@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.7.7",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
     "leetcode-query": "^1.2.3",
