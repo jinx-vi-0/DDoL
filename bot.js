@@ -1,8 +1,10 @@
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
+import { LeetCode } from "leetcode-query";
 import cron from "node-cron";
 import keepAlive from "./keep_alive.js";
 import dotenv from "dotenv";
 import { loadCommands } from "./handler.js"; // Import the command handler
+const lc = new LeetCode();
 
 dotenv.config();
 
@@ -24,7 +26,7 @@ client.once("ready", () => {
 
   // Schedule the cron job for LeetCode daily challenge
   cron.schedule(
-    "0 6 * * *",
+    "*/30 * * * * *", // Run every 30 seconds
     async () => {
       try {
         const daily = await lc.daily();
