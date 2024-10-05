@@ -5,7 +5,7 @@ import keepAlive from "./keep_alive.js";
 import dotenv from "dotenv";
 import { loadCommands } from "./handler.js"; // Import the command handler
 const lc = new LeetCode();
-
+import axios from "axios";
 dotenv.config();
 
 const client = new Client({
@@ -26,14 +26,14 @@ client.once("ready", () => {
 
   // Schedule the cron job for LeetCode daily challenge
   cron.schedule(
-    "*/30 * * * * *", // Run every 30 seconds
+    "0 6 * * *",
     async () => {
       try {
         const daily = await lc.daily();
         const channel = client.channels.cache.get(process.env.CHANNEL_ID);
         if (channel) {
           const questionLink = `https://leetcode.com${daily.link}`;
-          const response = `everyone **LeetCode Daily Challenge ${daily.date}:**\n**${daily.question.title}** : ${questionLink}`;
+          const response = `@everyone **LeetCode Daily Challenge ${daily.date}:**\n**${daily.question.title}** : ${questionLink}`;
           channel.send(response);
         } else {
           console.error("Channel not found");
