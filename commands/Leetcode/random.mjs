@@ -4,7 +4,7 @@ export default {
   name: "random",
   description: "Shows a random LeetCode problem",
   aliases: ["rng"], // Add aliases here
-  execute(client, message, args) {
+  async execute(client, message, args) {
     try {
       const randomIndex = Math.floor(Math.random() * leetcodeProblems.length);
       let problem = leetcodeProblems[randomIndex];
