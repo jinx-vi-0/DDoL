@@ -124,12 +124,55 @@ client.on('messageCreate', async (message) => {
             console.error('Error fetching random LeetCode question:', error);
             message.channel.send('Sorry, I could not fetch a random LeetCode question.');
         }
-    }else if (command === ';user' && args.length === 2) {
+    } else if (command === ';user' && args.length === 2) {
         const username = args[1];
         try {
-            const contestInfo = await lc.user_contest_info(username);
-            const responseMessage = `username : **${username}**\nContest : ${contestInfo.userContestRanking.attendedContestsCount}\nRating : ${Math.round(contestInfo.userContestRanking.rating)}\nTop : ${contestInfo.userContestRanking.topPercentage}%\nBadge : ${contestInfo.userContestRanking.badge ? contestInfo.userContestRanking.badge : 'No badge'}`;
-            message.channel.send(responseMessage);
+            const [userInfo, contestInfo] = await Promise.all([
+                lc.user(username),
+                lc.user_contest_info(username)
+            ]);
+            
+            if (!userInfo.matchedUser) {
+                message.channel.send(`User "${username}" not found.`);
+                return;
+            }
+    
+            const user = userInfo.matchedUser;
+            const profile = user.profile;
+            const submitStats = user.submitStats;
+    
+            const embed = new EmbedBuilder()
+                .setColor('#FFD700')  // Gold color for the embed
+                .setTitle(`LeetCode Profile: **${username}**`)
+                .setThumbnail(profile.userAvatar)
+                .addFields(
+                    { name: '👤 Real Name', value: profile.realName || '*Not provided*', inline: true },
+                    { name: '🏆 Ranking', value: profile.ranking ? profile.ranking.toString() : '*Not ranked*', inline: true },
+                    { name: '🌍 Country', value: profile.countryName || '*Not provided*', inline: true },
+                    { name: '🏢 Company', value: profile.company || '*Not provided*', inline: true },
+                    { name: '🎓 School', value: profile.school || '*Not provided*', inline: true },
+                    { name: '\u200B', value: '⬇️ **Problem Solving Stats**', inline: false },
+                    { name: '🟢 Easy', value: `Solved: ${submitStats.acSubmissionNum[1].count} / ${submitStats.totalSubmissionNum[1].count}`, inline: true },
+                    { name: '🟠 Medium', value: `Solved: ${submitStats.acSubmissionNum[2].count} / ${submitStats.totalSubmissionNum[2].count}`, inline: true },
+                    { name: '🔴 Hard', value: `Solved: ${submitStats.acSubmissionNum[3].count} / ${submitStats.totalSubmissionNum[3].count}`, inline: true },
+                    { name: '📊 Total', value: `Solved: ${submitStats.acSubmissionNum[0].count} / ${submitStats.totalSubmissionNum[0].count}`, inline: true }
+                );
+    
+            // Add contest info
+            if (contestInfo.userContestRanking) {
+                embed.addFields(
+                    { name: '🚩 **Contest Info**', value: `\`\`\`Rating: ${Math.round(contestInfo.userContestRanking.rating)}\nRanking: ${contestInfo.userContestRanking.globalRanking}\nTop: ${contestInfo.userContestRanking.topPercentage.toFixed(2)}%\nAttended: ${contestInfo.userContestRanking.attendedContestsCount}\`\`\`` }
+                );
+            }
+    
+            // Add badges if any
+            if (user.badges && user.badges.length > 0) {
+                const badgeNames = user.badges.map(badge => badge.displayName).join('\n•');
+                embed.addFields({ name: '🏅 Badges', value: "•"+badgeNames, inline: false });
+            }
+    
+            message.channel.send({ embeds: [embed] });
+    
         } catch (error) {
             console.error('Error fetching user info:', error);
             message.channel.send('Sorry, I could not fetch the user info.');
