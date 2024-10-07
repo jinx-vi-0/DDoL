@@ -18,6 +18,36 @@ const client = new Client({
     ]
 });
 
+function calculateStreak(submissionCalendar) {
+    submissionCalendar = JSON.parse(submissionCalendar);
+    const datesWithSubmissions = Object.entries(submissionCalendar)
+        .filter(([ts, count]) => count > 0)
+        .map(([ts]) => new Date(ts * 1000))
+        .sort((a, b) => a - b); 
+    
+    if (datesWithSubmissions.length === 0) return 0;
+ 
+    let currentStreak = 0;
+    let hasSolvedToday = false;   
+    const currentDate = new Date(); 
+    const lastSubmissionDate = datesWithSubmissions[datesWithSubmissions.length - 1]; 
+    // Check if the last submission was today
+    if (lastSubmissionDate.setHours(0, 0, 0, 0) === currentDate.setHours(0, 0, 0, 0)) {
+        hasSolvedToday = true;
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    // Calculate streak
+    for (let i = datesWithSubmissions.length - 1; i >= 0; i--) {
+        currentDate.setDate(currentDate.getDate() - 1);
+        if (datesWithSubmissions[i].setHours(0, 0, 0, 0) === currentDate.setHours(0, 0, 0, 0)) {
+            currentStreak += 1;
+        } else {
+            break;
+        }
+    }
+    return {currentStreak, hasSolvedToday};
+}
+
 async function fetchLeetCodeProblems() {
     try {
         const response = await axios.get('https://leetcode.com/api/problems/all/');
@@ -180,13 +210,24 @@ client.on('messageCreate', async (message) => {
     } else if (command === ';streak' && args.length === 2) {
         const username = args[1];
         try {
-            const streakInfo = await lc.user(username);
-            let streakMessage;
-            if (streakInfo.consecutiveDays > 0) {
-                streakMessage = `**${username}** has solved a problem for ${streakInfo.consecutiveDays} consecutive days! Keep it up!`;
-            } else {
-                streakMessage = `**${username}** does not have a streak yet. Start solving problems to build your streak!`;
+            const user = await lc.user(username);
+            let streakInfo = 0;
+            let hasSolvedToday = false;
+            if(user.matchedUser) {
+                ({ currentStreak: streakInfo, hasSolvedToday } = calculateStreak(user.matchedUser.submissionCalendar));
             }
+ 
+            let streakMessage;
+            if (streakInfo > 0) {
+                if (hasSolvedToday) {
+                    streakMessage = `🎉  **${username}** has solved a problem for ${streakInfo} consecutive days! Great work, keep it up!  💪`;
+                } else {
+                    streakMessage = `⚠️  **${username}** has solved a problem for ${streakInfo} consecutive days! Solve today's problem to maintain your streak and prevent it from resetting!  🔄`;
+                }
+            } else {
+                streakMessage = `❌  **${username}** does not have a streak yet. Start solving problems today to build your streak!  🚀`;
+            }     
+
             message.channel.send(streakMessage);
         } catch (error) {
             console.error('Error fetching streak info:', error);
