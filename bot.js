@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials,EmbedBuilder } from 'discord.js';
+import { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder,ButtonStyle } from 'discord.js';
 import { LeetCode } from 'leetcode-query';
 import cron from 'node-cron';
 import keepAlive from './keep_alive.js';
@@ -17,6 +17,14 @@ const client = new Client({
         Partials.Channel
     ]
 });
+
+function chunkArray(array, size) {
+    const chunked = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunked.push(array.slice(i, i + size));
+    }
+    return chunked;
+}
 
 function calculateStreak(submissionCalendar) {
     submissionCalendar = JSON.parse(submissionCalendar);
@@ -60,6 +68,13 @@ async function fetchLeetCodeProblems() {
 
 const lc = new LeetCode();
 let leetcodeProblems = []
+
+const topics = [
+    'Array', 'String', 'Hash Table', 'Dynamic Programming', 'Math',
+    'Sorting', 'Greedy', 'Depth-First Search', 'Binary Search', 'Database',
+    'Breadth-First Search', 'Tree', 'Matrix', 'Two Pointers', 'Bit Manipulation',
+    'Stack', 'Design', 'Heap (Priority Queue)', 'Graph', 'Simulation'
+];
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -234,14 +249,75 @@ client.on('messageCreate', async (message) => {
             message.channel.send('Sorry, I could not fetch the streak info.');
         }
     }
+    else  if (command === ';topics') {
+        const chunkedTopics = chunkArray(topics, 5); // Split topics into groups of 5
+        const rows = chunkedTopics.map(chunk => 
+            new ActionRowBuilder().addComponents(
+                chunk.map(topic => 
+                    new ButtonBuilder()
+                        .setCustomId(`topic_${topic.toLowerCase().replace(/\s+/g, '-')}`)
+                        .setLabel(topic)
+                        .setStyle(ButtonStyle.Secondary)
+                )
+            )
+        );
+
+         message.channel.send({ 
+            content: 'Choose a topic to get a random question:', 
+            components: rows 
+        });
+    }
     else if (command === ';help') {
         const helpMessage = `**Available Commands:**\n
         \`;potd\` - Shows the LeetCode Daily Challenge\n
-        \`;random\` - Shows a random LeetCode problem\n
+        \`;random [difficulty]\` - Shows a random LeetCode problem (optional: specify difficulty)\n
         \`;user <username>\` - Shows user Info\n
-        \`;streak <username>\` - Shows user Streak Info
-        \`;help\` - Shows help message`;
+        \`;streak <username>\` - Shows user Streak Info\n
+        \`;topics\` - Shows a list of LeetCode topics to choose from\n
+        \`;help\` - Shows this help message`;
         message.channel.send(helpMessage);
+    }
+});
+
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isButton()) return;
+
+    if (interaction.customId.startsWith('topic_')) {
+        const selectedTopic = interaction.customId.replace('topic_', '');
+        await interaction.deferReply();
+
+        try {
+            const topicQuestions = await lc.problems({
+                categorySlug: '',
+                skip: 0,
+                limit: 300000,
+                filters: { tags: [selectedTopic] }
+            });
+
+            if (topicQuestions.questions.length === 0) {
+                await interaction.editReply('No questions found for this topic.');
+                return;
+            }
+
+            const randomQuestion = topicQuestions.questions[Math.floor(Math.random() * topicQuestions.questions.length)];
+
+            const questionLink = `https://leetcode.com/problems/${randomQuestion.titleSlug}/`;
+            const embed = new EmbedBuilder()
+                .setTitle(`Random ${selectedTopic.replace(/-/g, ' ')} Question: ${randomQuestion.title}`)
+                .setURL(questionLink)
+                .setColor(0x0099FF)
+                .addFields(
+                    { name: 'Difficulty', value: randomQuestion.difficulty, inline: true },
+                    { name: 'Link', value: `[Solve Problem](${questionLink})`, inline: true },
+                    { name: 'Acceptance Rate', value: `${randomQuestion.acRate.toFixed(2)}%`, inline: true }
+                )
+                .setFooter({ text: 'Good luck solving this problem!' });
+
+            await interaction.editReply({ embeds: [embed], components: [] });
+        } catch (error) {
+            console.error('Error fetching topic question:', error);
+            await interaction.editReply('Sorry, I could not fetch a question for this topic.');
+        }
     }
 });
 
