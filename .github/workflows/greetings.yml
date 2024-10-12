@@ -31,15 +31,13 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { context } = require('@actions/github');
             const prNumber = context.payload.pull_request.number;
-            const prAuthor = context.payload.pull_request.user.login; // Get the username of the PR author
             const message = `
-              🎉 Congratulations @${prAuthor} on getting your pull request merged! Thank you for your contribution to the project. 
+              🎉 Congratulations on getting your pull request merged! Thank you for your contribution to the project. 
               If you enjoy working with us, consider giving us a star on GitHub ⭐ and following us on our socials!
             `;
-            await github.rest.issues.createComment({
+            await github.pulls.createReviewComment({
               ...context.repo,
-              issue_number: prNumber,
+              pull_number: prNumber,
               body: message,
             });
