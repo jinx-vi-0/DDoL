@@ -1,6 +1,10 @@
 name: Greetings
 
-on: [pull_request_target, issues]
+on:
+  pull_request_target:
+    types: [opened, reopened, closed]
+  issues:
+    types: [opened]
 
 jobs:
   greeting:
@@ -9,8 +13,31 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-    - uses: actions/first-interaction@v1
-      with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        issue-message: "👋 Thank you for raising an issue! We appreciate your effort in helping us improve. Our DDoL team will review it shortly. Stay tuned!"
-        pr-message: " 🎉 Thank you for your contribution! Your pull request has been submitted successfully. A maintainer from DDoL team will review it as soon as possible. We appreciate your support in making this project better"
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: "👋 Thank you for raising an issue! We appreciate your effort in helping us improve. Our DDoL team will review it shortly. Stay tuned!"
+          pr-message: "🎉 Thank you for your contribution! Your pull request has been submitted successfully. A maintainer from DDoL team will review it as soon as possible. We appreciate your support in making this project better."
+
+  congratulate:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Comment on the PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const message = `
+              🎉 Congratulations on getting your pull request merged! Thank you for your contribution to the project. 
+              If you enjoy working with us, consider giving us a star on GitHub ⭐ and following us on our socials!
+            `;
+            await github.issues.createComment({
+              ...context.repo,
+              issue_number: prNumber,
+              body: message,
+            });
