@@ -1,16 +1,28 @@
 import { EmbedBuilder } from "discord.js";
 
+const topics = [
+    'Array', 'String', 'Hash Table', 'Dynamic Programming', 'Math',
+    'Sorting', 'Greedy', 'Depth-First Search', 'Binary Search', 'Database',
+    'Breadth-First Search', 'Tree', 'Matrix', 'Two Pointers', 'Bit Manipulation',
+    'Stack', 'Design', 'Heap (Priority Queue)', 'Graph', 'Simulation'
+];
+
 export default {
     name: 'topic',
     run: async (interaction, lc = interaction.client.lc) => {
-        const selectedTopic = interaction.customId.replace('topic_', '');
         await interaction.deferReply();
+
+        const [,topicIndex,difficultyIndex] = interaction.customId.split("_")
+        
+        const difficulty = difficultyIndex === '0' ? null : difficultyIndex === '1' ? 'EASY' : difficultyIndex === '2' ? 'MEDIUM' : 'HARD' 
+        const topic = topics[topicIndex]
+
 
         const topicQuestions = await lc.problems({
             categorySlug: '',
             skip: 0,
             limit: 300000,
-            filters: { tags: [selectedTopic] }
+            filters: { tags: [topic.toLowerCase().replace(/\s+/g, '-')], difficulty }
         });
 
         if (topicQuestions.questions.length === 0) {
@@ -22,7 +34,7 @@ export default {
 
         const questionLink = `https://leetcode.com/problems/${randomQuestion.titleSlug}/`;
         const embed = new EmbedBuilder()
-            .setTitle(`Random ${selectedTopic.replace(/-/g, ' ')} Question: ${randomQuestion.title}`)
+            .setTitle(`Random ${topic} Question: ${randomQuestion.title}`)
             .setURL(questionLink)
             .setColor(0x0099FF)
             .addFields(
