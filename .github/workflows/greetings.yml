@@ -36,8 +36,8 @@ jobs:
               🎉 Congratulations on getting your pull request merged! Thank you for your contribution to the project. 
               If you enjoy working with us, consider giving us a star on GitHub ⭐ and following us on our socials!
             `;
-            await github.issues.createComment({
+            await github.pulls.createReviewComment({
               ...context.repo,
-              issue_number: prNumber,
+              pull_number: prNumber,
               body: message,
             });
