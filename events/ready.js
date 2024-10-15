@@ -99,7 +99,8 @@ export default async (client, lc = client.lc) => {
 
         await client.guilds.cache.forEach(guild => {           
             guild.channels.cache.forEach(channel => {
-                    if (channel.name == 'general'){
+                //Type 0 => TExt Channel
+                    if (channel.type == 0){
                         channel.send({
                             content: bold(`@everyone, Upcoming LeetCode Contest Reminder!`),
                             embeds: [embed]
