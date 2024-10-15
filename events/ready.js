@@ -110,9 +110,6 @@ export default async (client, lc = client.lc) => {
     }
 
 
-    // Schedule initial reminders
-    await scheduleContestReminders();
-
 
     // Refresh contest schedule every Friday
     cron.schedule('0 0 * * 5', scheduleContestReminders, {
