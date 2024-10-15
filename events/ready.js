@@ -97,17 +97,19 @@ export default async (client, lc = client.lc) => {
             .setFooter({ text: 'Contest starts in 1 hour!' });
 
 
-        await client.guilds.cache.forEach(guild => {           
-            guild.channels.cache.forEach(channel => {
-                //Type 0 => TExt Channel
-                    if (channel.type == 0){
-                        channel.send({
+        for (const guild of client.guilds.cache.values()) {           
+                for (const channel of guild.channels.cache.values()) {
+                    // Type 0 => Text Channel
+                    if (channel.type === 0) {
+                       await channel.send({
                             content: bold(`@everyone, Upcoming LeetCode Contest Reminder!`),
                             embeds: [embed]
                         });
+                        break;
                     }
-            });
-        });
+                }
+            }
+        
     }
 
 
