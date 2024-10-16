@@ -4,7 +4,7 @@ on:
   pull_request_target:
     types: [opened, reopened, closed]
   issues:
-    types: [opened]
+    types: [opened, closed]
 
 jobs:
   greeting:
@@ -20,24 +20,23 @@ jobs:
           pr-message: "🎉 Thank you for your contribution! Your pull request has been submitted successfully. A maintainer from DDoL team will review it as soon as possible. We appreciate your support in making this project better."
 
   congratulate:
-    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    if: github.event.action == 'closed' && github.event.issue != null
     runs-on: ubuntu-latest
     permissions:
       issues: write
-      pull-requests: write
     steps:
-      - name: Comment on the PR
+      - name: Comment on the closed issue
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prNumber = context.payload.pull_request.number;
+            const issueNumber = context.payload.issue.number;
             const message = `
-              🎉 Congratulations on getting your pull request merged! Thank you for your contribution to the project. 
+              🎉 Congratulations on closing the issue! Thank you for your contribution to the project. 
               If you enjoy working with us, consider giving us a star on GitHub ⭐ and following us on our socials!
             `;
-            await github.pulls.createReviewComment({
+            await github.issues.createComment({
               ...context.repo,
-              pull_number: prNumber,
+              issue_number: issueNumber,
               body: message,
             });
