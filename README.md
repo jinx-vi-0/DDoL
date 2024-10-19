@@ -10,6 +10,8 @@
 [![Invite Me](https://img.shields.io/badge/Invite%20Me-000000?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/oauth2/authorize?client_id=1260183706866552852&permissions=274878057472&integration_type=0&scope=bot)
 [![Join Community](https://img.shields.io/badge/Join_Community-000000?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Rxx6p5je)
 
+<a href="https://www.producthunt.com/posts/ddol?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-ddol" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=497588&theme=light" alt="DDoL - Daily&#0032;Dose&#0032;of&#0032;Leetcode | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
 </div>
 
 ## <img src="https://user-images.githubusercontent.com/74038190/216122041-518ac897-8d92-4c6b-9b3f-ca01dcaf38ee.png" width="30" /> Introduction
