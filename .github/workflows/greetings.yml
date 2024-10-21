@@ -16,8 +16,8 @@ jobs:
       - uses: actions/first-interaction@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: "👋 Hey there, rockstar! Thanks for dropping an issue! The BlogLog team is on it like pineapple on pizza (love it or hate it). Stick around, magic's about to happen!"
-          pr-message: "🎉 Boom! Your pull request just flew into the BlogLog HQ. High fives all around! Our team of tech wizards will check it out and get back to you faster than you can say 'code ninja!' Thanks for leveling up the project!"
+          issue-message: "👋 Hey there, rockstar! Thanks for dropping an issue! The DDoL team is on it like pineapple on pizza (love it or hate it). Stick around, magic's about to happen!"
+          pr-message: "🎉 Boom! Your pull request just flew into the DDoL HQ. High fives all around! Our team of tech wizards will check it out and get back to you faster than you can say 'code ninja!' Thanks for leveling up the project!"
 
   congratulate:
     if: github.event.action == 'closed' && github.event.issue != null
